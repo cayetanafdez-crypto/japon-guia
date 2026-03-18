@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Japon en 15-21 dias - Guia de Viaje Premium</title>
+<meta name="description" content="Guia visual premium de Japon con 3 itinerarios, hoteles unicos, consejos practicos y guias detalladas por ciudad."/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=DM+Serif+Display&family=Noto+Sans+JP:wght@400;700&display=swap');
+:root{
+  --bg:#faf7f2;--paper:#fff;--ink:#1a1a2e;--muted:#6b7280;
+  --red:#c0392b;--red-soft:#fdeaea;--gold:#d4a853;--gold-soft:#fdf6e3;
+  --green:#2d6a4f;--green-soft:#e8f5e9;--blue:#1e3a5f;--blue-soft:#e8f0fe;
+  --line:#e8e0d4;--shadow:0 8px 40px rgba(0,0,0,.06);
+  --radius:20px;--max:1200px;
+  --font:'DM Sans',sans-serif;--serif:'DM Serif Display',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;transition:all .4s}
+.nav.scrolled{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);box-shadow:0 1px 20px rgba(0,0,0,.08)}
+.nav-logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px;color:#fff;transition:color .4s}
+.nav.scrolled .nav-logo{color:var(--ink)}
+.nav-links{display:flex;gap:6px}
+.nav-links a{padding:8px 16px;border-radius:999px;font-size:14px;font-weight:600;color:rgba(255,255,255,.85);transition:all .3s}
+.nav.scrolled .nav-links a{color:var(--muted)}
+.nav-links a:hover{background:rgba(255,255,255,.15)}
+.nav.scrolled .nav-links a:hover{background:rgba(0,0,0,.05);color:var(--ink)}
+.hamburger{display:none;width:36px;height:36px;align-items:center;justify-content:center;border-radius:10px;color:#fff;transition:color .4s}
+.nav.scrolled .hamburger{color:var(--ink)}
+.mobile-menu{display:none;position:fixed;inset:0;background:rgba(26,26,46,.97);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{color:#fff;font-size:20px;font-weight:700;padding:12px 32px;border-radius:16px}
+.mobile-menu a:hover{background:rgba(255,255,255,.1)}
+.mobile-close{position:absolute;top:20px;right:20px;color:#fff;font-size:32px;cursor:pointer;width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 40%,#0f3460 100%)}
+.hero-bg{position:absolute;inset:0;background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Kinkaku3402CBs3200.jpg/1280px-Kinkaku3402CBs3200.jpg') center/cover;opacity:.35}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,15,35,.95) 0%,rgba(15,15,35,.4) 50%,rgba(15,15,35,.2) 100%)}
+.hero-content{position:relative;z-index:2;padding:0 clamp(24px,5vw,80px) clamp(60px,10vh,120px);max-width:900px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);padding:10px 18px;border-radius:999px;color:rgba(255,255,255,.9);font-size:13px;font-weight:700;letter-spacing:.05em;margin-bottom:24px}
+.hero h1{font-family:var(--serif);font-size:clamp(40px,8vw,80px);line-height:.95;color:#fff;margin-bottom:20px;letter-spacing:-.02em}
+.hero h1 span{color:var(--gold)}
+.hero-sub{color:rgba(255,255,255,.7);font-size:clamp(16px,2vw,20px);max-width:650px;margin-bottom:32px}
+.hero-stats{display:flex;gap:32px;flex-wrap:wrap}
+.hero-stat{text-align:left}
+.hero-stat b{display:block;font-size:28px;color:#fff}
+.hero-stat span{color:rgba(255,255,255,.5);font-size:13px}
+.scroll-hint{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:2;color:rgba(255,255,255,.4);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:6px;animation:bob 2s ease infinite}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+
+/* SECTIONS */
+.wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+section{padding:80px 0}
+.sec-label{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:12px}
+.sec-label .dot{width:8px;height:8px;border-radius:50%;background:var(--red)}
+.sec-title{font-family:var(--serif);font-size:clamp(32px,5vw,48px);line-height:1.05;margin-bottom:12px}
+.sec-desc{color:var(--muted);font-size:17px;max-width:700px;margin-bottom:40px}
+
+/* CARDS */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);transition:transform .3s,box-shadow .3s}
+.card:hover{transform:translateY(-2px);box-shadow:0 12px 48px rgba(0,0,0,.1)}
+.card h4{font-size:18px;margin-bottom:8px}
+.card p{color:var(--muted);font-size:15px}
+
+/* ITINERARIES TABS */
+.tab-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
+.tab-btn{padding:12px 22px;border-radius:999px;font-size:14px;font-weight:700;border:2px solid var(--line);background:var(--paper);color:var(--muted);cursor:pointer;transition:all .3s}
+.tab-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ITINERARY TABLE */
+.itin-table{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--paper);box-shadow:var(--shadow)}
+.itin-table th{background:var(--ink);color:#fff;padding:14px 18px;text-align:left;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.itin-table td{padding:12px 18px;border-bottom:1px solid var(--line);font-size:15px}
+.itin-table tr:last-child td{border-bottom:none}
+.itin-table tr:hover td{background:#faf8f5}
+.day-num{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:10px;font-weight:800;font-size:14px;color:#fff;background:var(--red)}
+.day-num.green{background:var(--green)}
+.day-num.gold{background:var(--gold)}
+.day-num.blue{background:var(--blue)}
+
+/* MAP */
+.map-wrap{border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow)}
+.map-header{background:var(--ink);color:#fff;padding:20px 24px}
+.map-header h3{font-family:var(--serif);font-size:24px;margin-bottom:4px}
+.map-header p{color:rgba(255,255,255,.6);font-size:14px}
+#map{height:500px;width:100%}
+.map-legend{display:flex;gap:20px;flex-wrap:wrap;padding:14px 24px;background:var(--paper);border-top:1px solid var(--line);font-size:13px;font-weight:600;color:var(--muted)}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+
+/* HOTELS */
+.hotel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.hotel-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);transition:transform .3s}
+.hotel-card:hover{transform:translateY(-2px)}
+.hotel-card h4{font-size:16px;margin-bottom:6px}
+.hotel-card .loc{font-size:13px;color:var(--muted);margin-bottom:8px}
+.hotel-card p{font-size:14px;color:#555}
+.hotel-tag{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.03em}
+.hotel-tag.luxury{background:var(--gold-soft);color:#8a6420;border:1px solid #ead8b2}
+.hotel-tag.onsen{background:var(--blue-soft);color:var(--blue);border:1px solid #c5d8f0}
+.hotel-tag.charm{background:var(--green-soft);color:var(--green);border:1px solid #b8dcc4}
+.hotel-tag.budget{background:#f3f4f6;color:#555;border:1px solid #ddd}
+
+/* TIPS */
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.tip-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+.tip-card .tip-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:14px}
+.tip-card h4{font-size:17px;margin-bottom:8px}
+.tip-card p{font-size:15px;color:#555}
+
+/* CITY GUIDES */
+.city-guide{margin-bottom:48px;scroll-margin-top:80px}
+.city-header{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.city-icon{width:56px;height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.city-header h3{font-family:var(--serif);font-size:clamp(26px,4vw,36px)}
+.city-header p{color:var(--muted);font-size:15px;margin-top:4px}
+.sub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:20px}
+.sub-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.sub-card h5{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sub-card ul{list-style:none;padding:0}
+.sub-card li{padding:6px 0;font-size:15px;color:#444;border-bottom:1px solid #f0ebe3}
+.sub-card li:last-child{border-bottom:none}
+.sub-card li strong{color:var(--ink)}
+.highlight-box{background:var(--gold-soft);border:1px solid #ead8b2;border-radius:var(--radius);padding:20px;margin-bottom:20px}
+.highlight-box h5{color:#7a5722;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.highlight-box p{font-size:15px;color:#6b5a3a}
+
+/* FOOTER */
+.footer{background:var(--ink);color:rgba(255,255,255,.6);padding:40px 0;margin-top:40px}
+.footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer p{font-size:14px}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .hero-stats{gap:20px}
+  section{padding:48px 0}
+  .sub-grid,.hotel-grid,.tips-grid{grid-template-columns:1fr}
+  .itin-table{font-size:14px}
+  .itin-table th,.itin-table td{padding:10px 12px}
+  #map{height:350px}
+}
+@media print{
+  .nav,.hero-bg,.hero-overlay,.scroll-hint,.hamburger,.mobile-menu{display:none!important}
+  .hero{min-height:auto;padding:40px;background:var(--ink)!important}
+  section{padding:24px 0;break-inside:avoid}
+  .card,.sub-card,.hotel-card,.tip-card{box-shadow:none;break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="nav-logo">&#x1F5FE; Japon</div>
+  <div class="nav-links">
+    <a href="#itinerarios">Itinerarios</a>
+    <a href="#mapa">Mapa</a>
+    <a href="#hoteles">Hoteles</a>
+    <a href="#consejos">Consejos</a>
+    <a href="#guias">Guias por ciudad</a>
+  </div>
+  <div class="hamburger" onclick="document.getElementById('mobile-menu').classList.add('open')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <div class="mobile-close" onclick="this.parentElement.classList.remove('open')">&times;</div>
+  <a href="#itinerarios" onclick="this.parentElement.classList.remove('open')">Itinerarios</a>
+  <a href="#mapa" onclick="this.parentElement.classList.remove('open')">Mapa</a>
+  <a href="#hoteles" onclick="this.parentElement.classList.remove('open')">Hoteles</a>
+  <a href="#consejos" onclick="this.parentElement.classList.remove('open')">Consejos</a>
+  <a href="#guias" onclick="this.parentElement.classList.remove('open')">Guias por ciudad</a>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge">GUIA PREMIUM &middot; JAPON</div>
+    <h1>Tu viaje a <span>Japon</span>, paso a paso</h1>
+    <p class="hero-sub">Tres itinerarios reales, hoteles probados, restaurantes favoritos y todos los consejos que necesitas para un viaje inolvidable.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><b>3</b><span>itinerarios</span></div>
+      <div class="hero-stat"><b>15-21</b><span>dias</span></div>
+      <div class="hero-stat"><b>30+</b><span>restaurantes</span></div>
+      <div class="hero-stat"><b>20+</b><span>hoteles</span></div>
+    </div>
+    <p style="margin-top:28px;color:rgba(255,255,255,.45);font-size:14px;font-weight:600;letter-spacing:.03em">Creado por Cayetana Fdez Trevijano</p>
+  </div>
+  <div class="scroll-hint">
+    Descubre mas
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</header>
+
+<!-- ITINERARIOS -->
+<section id="itinerarios">
+<div class="wrap">
+  <div class="sec-label"><span class="dot"></span> ITINERARIOS</div>
+  <h2 class="sec-title">Elige tu aventura</h2>
+  <p class="sec-desc">Tres rutas reales segun tu estilo de viaje: principiantes, amantes del arte o exploradores rurales.</p>
+
+  <div class="tab-btns">
+    <button class="tab-btn active" onclick="switchTab(0)">Principiantes (15 dias)</button>
+    <button class="tab-btn" onclick="switchTab(1)">Arte + Verano (21 dias)</button>
+    <button class="tab-btn" onclick="switchTab(2)">Rural + Tohoku (16 dias)</button>
+  </div>
+
+  <!-- TAB 1: Principiantes -->
+  <div class="tab-panel active" id="tab-0">
+    <table class="itin-table">
+      <thead><tr><th>Dia</th><th>Visita</th><th>Dormir</th></tr></thead>
+      <tbody>
+        <tr><td><span class="day-num">1</span></td><td>Llegada a Tokyo, adaptacion jet lag</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">2</span></td><td>Tokyo &rarr; Ruta Nakasendo (Magome &rarr; Tsumago)</td><td>Nakatsugawa</td></tr>
+        <tr><td><span class="day-num green">3</span></td><td>Takayama: mercados, casco antiguo, sake</td><td>Takayama</td></tr>
+        <tr><td><span class="day-num green">4</span></td><td>Shirakawa-go + bus a Kanazawa</td><td>Kanazawa</td></tr>
+        <tr><td><span class="day-num gold">5</span></td><td>Kanazawa: Kenrokuen, Omicho, barrio geishas</td><td>Kanazawa</td></tr>
+        <tr><td><span class="day-num">6</span></td><td>Osaka: castillo, Kuromon, Dotonbori</td><td>Osaka</td></tr>
+        <tr><td><span class="day-num">7</span></td><td>Osaka: Umeda, Shitennoji, callejeo</td><td>Osaka</td></tr>
+        <tr><td><span class="day-num gold">8</span></td><td>Day trip Nara: Todai-ji, ciervos, Kasuga</td><td>Osaka</td></tr>
+        <tr><td><span class="day-num gold">9</span></td><td>Kyoto oeste: Kinkaku-ji, Arashiyama, bambu</td><td>Kyoto</td></tr>
+        <tr><td><span class="day-num gold">10</span></td><td>Kyoto este: Higashiyama, Kiyomizu-dera, Gion</td><td>Kyoto</td></tr>
+        <tr><td><span class="day-num">11</span></td><td>Shinkansen a Tokyo, TeamLab o museo</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">12</span></td><td>Tokyo: Asakusa, Ueno, museos</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">13</span></td><td>Tokyo: Shibuya, vintage, Ginza</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">14</span></td><td>Dia comodin: Monte Fuji o Tokyo libre</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">15</span></td><td>Harajuku, Meiji Jingu &rarr; aeropuerto</td><td>Vuelo</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TAB 2: Arte + Verano -->
+  <div class="tab-panel" id="tab-1">
+    <table class="itin-table">
+      <thead><tr><th>Dia</th><th>Visita</th><th>Dormir</th></tr></thead>
+      <tbody>
+        <tr><td><span class="day-num">1</span></td><td>Llegada a Tokyo</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">2</span></td><td>Tokyo: Asakusa, Senso-ji</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">3</span></td><td>Tokyo: Shibuya, Harajuku, Meiji Jingu</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num blue">4</span></td><td>Tokyo: Nezu Museum, Yayoi Kusama, TeamLab</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">5</span></td><td>Tokyo: Akihabara, Ueno, museos</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">6</span></td><td>Tokyo: Shimokitazawa, Nakameguro</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">7</span></td><td>Tokyo: Ginza, compras, Harakadu</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">8</span></td><td>Tokyo: dia libre / Jimbocho</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num green">9</span></td><td>Hakone: vistas Fuji, onsen</td><td>Hakone</td></tr>
+        <tr><td><span class="day-num gold">10</span></td><td>Kyoto: Kinkaku-ji, Arashiyama</td><td>Kyoto</td></tr>
+        <tr><td><span class="day-num blue">11</span></td><td>Naoshima: isla del arte contemporaneo</td><td>Naoshima</td></tr>
+        <tr><td><span class="day-num">12</span></td><td>Osaka: Kuromon, Dotonbori</td><td>Osaka</td></tr>
+        <tr><td><span class="day-num green">13</span></td><td>Vuelo a Ishigaki (Okinawa)</td><td>Ishigaki</td></tr>
+        <tr><td><span class="day-num green">14</span></td><td>Ishigaki: playas, snorkel</td><td>Ishigaki</td></tr>
+        <tr><td><span class="day-num green">15</span></td><td>Ishigaki: Kabira Bay, manglar</td><td>Ishigaki</td></tr>
+        <tr><td><span class="day-num green">16</span></td><td>Ishigaki: islas cercanas / relax</td><td>Ishigaki</td></tr>
+        <tr><td><span class="day-num">17</span></td><td>Vuelo a Tokyo</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">18</span></td><td>Tokyo: Mori Art Museum, compras</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">19</span></td><td>Tokyo: ultimas visitas</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">20</span></td><td>Tokyo &rarr; Shanghai</td><td>Shanghai</td></tr>
+        <tr><td><span class="day-num">21</span></td><td>Shanghai &rarr; Madrid</td><td>Vuelo</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TAB 3: Rural + Tohoku -->
+  <div class="tab-panel" id="tab-2">
+    <table class="itin-table">
+      <thead><tr><th>Dia</th><th>Visita</th><th>Dormir</th></tr></thead>
+      <tbody>
+        <tr><td><span class="day-num">0</span></td><td>Madrid &rarr; Munich &rarr; Tokyo</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">1</span></td><td>Tokyo: adaptacion</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">2</span></td><td>Tokyo: Asakusa, Senso-ji</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">3</span></td><td>Tokyo: Shibuya, Harajuku</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">4</span></td><td>Tokyo: museos, barrios</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">5</span></td><td>Tokyo: Akihabara, compras</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num green">6</span></td><td>Sendai: shinkansen al norte</td><td>Chikusenso (onsen)</td></tr>
+        <tr><td><span class="day-num green">7</span></td><td>Sendai &rarr; Matsushima (bahia)</td><td>Sendai</td></tr>
+        <tr><td><span class="day-num green">8</span></td><td>Sendai &rarr; Yamadera (templo en la montana)</td><td>Sendai</td></tr>
+        <tr><td><span class="day-num gold">9</span></td><td>Hiraizumi &rarr; Kakudondate</td><td>Miyakowasure (onsen)</td></tr>
+        <tr><td><span class="day-num green">10</span></td><td>Aomori &rarr; Hirosaki</td><td>Hirosaki</td></tr>
+        <tr><td><span class="day-num green">11</span></td><td>Tsuroka</td><td>Tsuroka</td></tr>
+        <tr><td><span class="day-num green">12</span></td><td>Dewa Sanzan (tres montanas sagradas) &rarr; Tokyo</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">13</span></td><td>Tokyo: dia libre</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">14</span></td><td>Tokyo: ultimas compras</td><td>Tokyo</td></tr>
+        <tr><td><span class="day-num">15</span></td><td>Tokyo &rarr; Munich &rarr; Madrid</td><td>Vuelo</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<!-- MAPA -->
+<section id="mapa" style="padding-bottom:40px">
+<div class="wrap">
+  <div class="sec-label"><span class="dot" style="background:var(--green)"></span> MAPA</div>
+  <h2 class="sec-title">Ruta sobre el mapa</h2>
+  <p class="sec-desc" id="map-subtitle">Mostrando ruta: Principiantes (9 paradas)</p>
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="map-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div> Ciudad principal</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Naturaleza / Alpes</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div> Historica</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div> Arte / Playa</div>
+      <div class="legend-item"><svg width="20" height="3"><line x1="0" y1="1.5" x2="20" y2="1.5" stroke="var(--red)" stroke-width="3" stroke-dasharray="4,3"/></svg> Ruta del viaje</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- HOTELES -->
+<section id="hoteles">
+<div class="wrap">
+  <div class="sec-label"><span class="dot" style="background:var(--gold)"></span> HOTELES</div>
+  <h2 class="sec-title">Hoteles unicos y especiales</h2>
+  <p class="sec-desc">Seleccion de alojamientos probados: desde lujo puro hasta ryokans con onsen. Antes de reservar, escribe pidiendo un detalle de luna de miel si aplica.</p>
+
+  <div class="highlight-box" style="margin-bottom:24px">
+    <h5>Consejo de reserva</h5>
+    <p>Reserva directamente en la web del hotel. Escribeles antes pidiendo algun "detalle" diciendo que vais de luna de miel e intenta adjuntar algun papel que lo justifique. A veces ofrecen descuento o upgrade.</p>
+  </div>
+
+  <div class="hotel-grid" id="hotel-grid"></div>
+</div>
+</section>
+
+<!-- CONSEJOS -->
+<section id="consejos">
+<div class="wrap">
+  <div class="sec-label"><span class="dot" style="background:var(--blue)"></span> CONSEJOS</div>
+  <h2 class="sec-title">Antes de viajar</h2>
+  <p class="sec-desc">Todo lo que necesitas preparar antes de salir de casa.</p>
+  <div class="tips-grid" id="tips-grid"></div>
+</div>
+</section>
+
+<!-- GUIAS POR CIUDAD -->
+<section id="guias">
+<div class="wrap">
+  <div class="sec-label"><span class="dot" style="background:var(--green)"></span> GUIAS DETALLADAS</div>
+  <h2 class="sec-title">Cada ciudad, a fondo</h2>
+  <p class="sec-desc">Que ver, donde comer, compras y consejos especificos por destino.</p>
+  <div id="city-guides"></div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="wrap">
+    <p>Creado por <strong style="color:#fff">Cayetana Fdez Trevijano</strong> &middot; Basado en viajes reales a Japon &middot; 2023-2025</p>
+    <p style="font-size:13px">Las fotos se cargan desde Wikipedia/Wikimedia al abrir el archivo</p>
+  </div>
+</footer>
+
+<script>
+// NAV scroll
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>50)});
+
+// TABS
+function switchTab(i){
+  document.querySelectorAll('.tab-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+  document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',j===i));
+}
+
+// HOTELS DATA
+const hotels=[
+  {name:"Hoshinoya Tokyo",loc:"Tokyo",tag:"luxury",desc:"Ryokan de lujo en pleno centro. Experiencia unica."},
+  {name:"Aman Tokyo",loc:"Tokyo",tag:"luxury",desc:"Minimalismo japones con vistas espectaculares."},
+  {name:"Blossom Hibiya",loc:"Tokyo",tag:"charm",desc:"Hotel con estilo en zona centrica. Buena relacion calidad/precio."},
+  {name:"Aman Kyoto",loc:"Kyoto",tag:"luxury",desc:"Refugio en el bosque a las afueras de Kyoto."},
+  {name:"Suiran",loc:"Kyoto, Arashiyama",tag:"luxury",desc:"Junto al rio en Arashiyama. Entorno magico."},
+  {name:"Ace Hotel Kyoto",loc:"Kyoto",tag:"charm",desc:"Diseno contemporaneo en edificio historico."},
+  {name:"Maana Kiyomizu",loc:"Kyoto",tag:"charm",desc:"Boutique junto a Kiyomizu-dera."},
+  {name:"Sequence Kyoto Goyo",loc:"Kyoto",tag:"charm",desc:"Moderno y funcional."},
+  {name:"Mitu Kyoto Nishiki",loc:"Kyoto",tag:"charm",desc:"Cerca del mercado Nishiki."},
+  {name:"OMO5 Kyoto Gion",loc:"Kyoto, Gion",tag:"charm",desc:"Hoshino Resorts en pleno barrio de geishas."},
+  {name:"Hoshino Fuji",loc:"Monte Fuji",tag:"luxury",desc:"Glamping con vistas al Fuji. Espectacular."},
+  {name:"Park Hyatt Niseko",loc:"Niseko",tag:"luxury",desc:"Lujo en la nieve de Hokkaido."},
+  {name:"Amanemu",loc:"Ise",tag:"luxury",desc:"Onsen privado junto a la bahia de Ago."},
+  {name:"Karaksa Hotel",loc:"Osaka",tag:"charm",desc:"Buena base en Osaka, comodo y moderno."},
+  {name:"Ryokan Asunaro",loc:"Takayama",tag:"charm",desc:"Ryokan tradicional con encanto alpino."},
+  {name:"Honjin Hiranoya Kachoan",loc:"Takayama",tag:"onsen",desc:"Con onsen! Experiencia completa."},
+  {name:"Oyado Onn Nakatsugawa",loc:"Nakatsugawa",tag:"charm",desc:"Perfecto para la ruta Nakasendo."},
+  {name:"Benika Mukayo",loc:"Kanazawa (1.5h tren)",tag:"onsen",desc:"Onsen espectacular cerca de Kanazawa."},
+  {name:"Bettei Senjyuan",loc:"Tohoku",tag:"onsen",desc:"Onsen especial en la region de Tohoku."},
+  {name:"Satoyama Jujo",loc:"Tohoku",tag:"onsen",desc:"Diseno contemporaneo con aguas termales."},
+  {name:"Natuse Onsen Miyakowasure",loc:"Tohoku",tag:"onsen",desc:"Aguas termales en entorno rural precioso."},
+  {name:"APA Hotels",loc:"Varias ciudades",tag:"budget",desc:"Cadena japonesa economica y fiable. Buena opcion de base."},
+  {name:"Risonare Rasu (Hoshino)",loc:"Tohoku",tag:"luxury",desc:"Resort Hoshino en el norte."},
+  {name:"KAI Kirishima (Hoshino)",loc:"Kyushu",tag:"onsen",desc:"Onsen Hoshino con vistas volcanicas."},
+  {name:"KAI Poroto (Hoshino)",loc:"Hokkaido",tag:"onsen",desc:"Cultura ainu y aguas termales."},
+];
+// Group hotels by category and render with section headers
+const tagOrder=['luxury','onsen','charm','budget'];
+const tagLabels={luxury:'Lujo',onsen:'Onsen (aguas termales)',charm:'Con encanto',budget:'Economico'};
+const tagIcons={luxury:'&#x2B50;',onsen:'&#x2668;&#xFE0F;',charm:'&#x1F3E8;',budget:'&#x1F4B4;'};
+const tagColors={luxury:'var(--gold)',onsen:'var(--blue)',charm:'var(--green)',budget:'var(--muted)'};
+const grouped={};
+tagOrder.forEach(t=>grouped[t]=[]);
+hotels.forEach(h=>{if(grouped[h.tag])grouped[h.tag].push(h)});
+document.getElementById('hotel-grid').innerHTML=tagOrder.map(tag=>{
+  if(!grouped[tag].length) return '';
+  return `
+    <div style="grid-column:1/-1;margin-top:16px;margin-bottom:4px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:24px">${tagIcons[tag]}</span>
+      <h4 style="font-family:var(--serif);font-size:22px;margin:0">${tagLabels[tag]}</h4>
+      <span style="flex:1;height:1px;background:var(--line)"></span>
+      <span style="font-size:13px;color:var(--muted);font-weight:700">${grouped[tag].length} hoteles</span>
+    </div>
+    ${grouped[tag].map(h=>`
+      <div class="hotel-card">
+        <span class="hotel-tag ${h.tag}">${{luxury:'Lujo',onsen:'Onsen',charm:'Con encanto',budget:'Economico'}[h.tag]}</span>
+        <h4 style="margin-top:10px">${h.name}</h4>
+        <div class="loc">${h.loc}</div>
+        <p>${h.desc}</p>
+      </div>`).join('')}`;
+}).join('');
+
+// TIPS DATA
+const tips=[
+  {icon:"🚅",bg:"#fdeaea",title:"Japan Rail Pass",text:"Sacadlo con antelacion (tarda 15 dias). Si no da tiempo, la agencia Viajes HIS en Madrid lo gestiona por 10 euros mas. El JRP se activa en Japon y empieza a contar desde ese momento. Calculad bien los dias."},
+  {icon:"💳",bg:"#e8f0fe",title:"Suica Card",text:"Para Tokyo no compensa el JRP en metro. Usad la Suica card: se descarga desde el Wallet del iPhone y se carga directamente."},
+  {icon:"📱",bg:"#e8f5e9",title:"SIM + Google Maps",text:"Comprad una SIM en el aeropuerto. Google Maps es imprescindible para horarios de trenes y transporte local."},
+  {icon:"🍽",bg:"#fdf6e3",title:"Reservar restaurantes",text:"Reservad con tiempo, especialmente en Tokyo. En ciudades pequenas tambien es recomendable. Los horarios son estrictos: comida 11:00-13:30, cena 17:00-20:30."},
+  {icon:"🏪",bg:"#f3f4f6",title:"Convenience stores",text:"Cuando se os pase la hora: 7-Eleven para sandwiches y rolls de sushi; FamilyMart para pollo frito; Lawson para postres y dulces."},
+  {icon:"🧳",bg:"#e8f0fe",title:"Envio de maletas",text:"Muchos hoteles ofrecen servicio de envio de maletas (takkyubin). Ideal para paradas intermedias sin cargar equipaje."},
+];
+document.getElementById('tips-grid').innerHTML=tips.map(t=>`
+  <div class="tip-card">
+    <div class="tip-icon" style="background:${t.bg}">${t.icon}</div>
+    <h4>${t.title}</h4>
+    <p>${t.text}</p>
+  </div>`).join('');
+
+// CITY GUIDES DATA
+const guides=[
+  {
+    id:"alpes",name:"Alpes Japoneses",sub:"Nakatsugawa &middot; Takayama &middot; Shirakawa-go",
+    icon:"&#x26F0;",iconBg:"var(--green)",
+    highlights:[
+      {title:"Ruta Nakasendo",text:"Preciosa ruta por el Japan rural. La caminata de Magome a Tsumago dura ~4h y es sencilla. Desde Nakatsugawa hay autobuses locales a Magome."}
+    ],
+    sections:[
+      {title:"&#x1F3EF; Que ver en Takayama",items:["Mercado Jinya-mae Asaichi","Hida Folk Village","Santuario Sakurayama Hachimangu","Cata de sake: Bodega Kawashiri"]},
+      {title:"&#x1F363; Donde comer en Takayama",items:["<strong>Suzuya</strong>: shabu-shabu y carne a la brasa. Nos encanto.","<strong>Neighbird</strong>: recomendado por locales. Especialidad en brochetas.","<strong>Naniwa Sushi</strong>: si os apetece sushi."]},
+      {title:"&#x1F3D8; Shirakawa-go",items:["Con 3-4 horas es suficiente para verlo","Autobuses locales conectan con Takayama y Kanazawa","Sacar billetes cuanto antes en la estacion de Takayama","Subir al mirador: a pie o en mini bus"]},
+      {title:"&#x1F363; Comer en Shirakawa-go",items:["<strong>Nomura</strong>: sitio pequeno para noodles","<strong>Kyoshu</strong>: lugar tranquilo para un cafe"]},
+    ]
+  },
+  {
+    id:"kanazawa",name:"Kanazawa",sub:"Ciudad que sorprende muchisimo",
+    icon:"&#x1F3EF;",iconBg:"var(--gold)",
+    highlights:[
+      {title:"Ciudad sorpresa",text:"Quizas no teniamos mucha expectativa y por ello descubrimos muchas cosas. Una de las mejores paradas del viaje."}
+    ],
+    sections:[
+      {title:"&#x1F3EF; Que ver",items:["Higashi Chaya (barrio de geishas) + casa de te Shima","Jardines Kenrokuen","Castillo Kanazawa","Mercado Omicho","Templo Myoryuji (templo ninja)"]},
+      {title:"&#x1F363; Donde comer",items:["<strong>Otome Sushi</strong>: solo 8 sitios. Reservar! El chef sirve el sushi del dia. Calidad increible. Volveriamos 200%.","<strong>Kourin Sushi</strong>: pequeno, reservar. Buena calidad, menos sorprendente.","<strong>Kifune</strong>: no pudimos entrar, muy recomendado.","<strong>Komatsu Yasuke</strong>: en la lista pero cerraba esos dias. Sushi."]},
+      {title:"&#x1F6CD; Compras",items:["Tienda de vajillas antiguas japonesas: piezas especiales que no encontramos en otros lugares"]},
+      {title:"&#x1F3E8; Hotel especial",items:["<strong>Benika Mukayo</strong>: a 1.5h en tren. Experiencia onsen espectacular."]},
+    ]
+  },
+  {
+    id:"osaka",name:"Osaka",sub:"La cocina de Japon",
+    icon:"&#x1F3AE;",iconBg:"var(--red)",
+    highlights:[
+      {title:"Mercado Kuromon: subasta de atun",text:"IMPRESCINDIBLE. La subasta empieza a las 5am en punto, dura 15min. Ir 10min antes. Buscar zona J17. No vimos ningun turista. Ser respetuosos. Hay 2 restaurantes para desayunar sushi a las 5:30am!"}
+    ],
+    sections:[
+      {title:"&#x1F3EF; Que ver",items:["Mercado Kuromon Ichiba (subasta de atun a las 5am!)","Castillo Osaka","Dotonbori","Umeda Sky Building","Templo Shitennoji (el templo budista mas antiguo)"]},
+      {title:"&#x1F363; Donde comer",items:["Ciudad increible para comer: muchisimos puestos callejeros","Takoyaki, kushikatsu y picoteo urbano"]},
+    ]
+  },
+  {
+    id:"kyoto",name:"Kyoto",sub:"La gran capital clasica",
+    icon:"&#x26E9;",iconBg:"var(--gold)",
+    highlights:[
+      {title:"Transporte local",text:"Con el Japan Rail Pass se pueden coger bonos de dia para el transporte urbano. Merece mucho la pena porque entre templo y templo se cogen muchos autobuses."}
+    ],
+    sections:[
+      {title:"&#x26E9; Imprescindibles",items:["Gion y Pontocho (barrios de geisha)","Golden Pavilion / Kinkaku-ji","Nishiki Market","Nijo Castle","Kyoto Imperial Palace","Fushimi Inari Shrine"]},
+      {title:"&#x1F38B; Arashiyama",items:["Tenryu-ji Temple","Arashiyama Bamboo Forest","Okochi Sanso Villa","Iwatayama Monkey Park","Giou-ji Temple"]},
+      {title:"&#x1F3EF; Higashiyama Sur",items:["Shoren-in &rarr; Chion-in &rarr; Maruyama Park &rarr; Yasaka Shrine","Kodaiji &rarr; Ishibe-Koji Alley","Ninenzaka &rarr; Sannenzaka &rarr; Yasaka Pagoda &rarr; Kiyomizu-dera"]},
+      {title:"&#x1F6E4; Higashiyama Norte",items:["Nanzen-ji &rarr; Eikan-do","Path of Philosophy / Tetsugaku-no-Michi","Honen-in &rarr; Ginkaku-ji (Silver Pavilion)"]},
+      {title:"&#x1F363; Donde comer",items:["<strong>Nishiki Sushi Shin</strong>: omasake en el mercado Nishiki","<strong>Gion Duck Rice</strong>: noodles","<strong>Gochiso Shiyou</strong>: madre e hija, comida genial, muy pequeno","<strong>Kyo Unawa Onten</strong>: especializado en anguila","<strong>Nakasei Nikuzuki</strong>: carne / wagyu","<strong>Sugari</strong>: ramen y noodles"]},
+    ]
+  },
+  {
+    id:"tokyo",name:"Tokyo",sub:"La megaciudad infinita",
+    icon:"&#x1F5FC;",iconBg:"var(--red)",
+    highlights:[],
+    sections:[
+      {title:"&#x1F5FC; Imprescindibles",items:["Cruce Shibuya","Akihabara (zona tecnologia)","Templo Senso-ji (Asakusa)","Santuario Meiji","Ginza","Barrio Harajuku","Barrio Shinjuku"]},
+      {title:"&#x1F3A8; Arte y museos",items:["Nezu Museum","Yayoi Kusama Museum","TeamLab","Mori Art Museum"]},
+      {title:"&#x1F3D9; Con mas tiempo",items:["Torre de Tokyo (vistazas)","Inokashira Park","Templo Gotokuji","Nakameguro (barrio junto a un canal)","Harakadu (nuevo, arquitectura espectacular, terraza con jardines arriba)"]},
+      {title:"&#x1F6CD; Compras",items:["Shimokitazawa: ropa de 2a mano","Jimbocho: tiendas de libros","Metro Ogawamachi: tiendas de ski baratas","Super Potato: consolas retro","Bic Camera: electronica","Mandarake: anime"]},
+      {title:"&#x1F363; Donde comer",items:[
+        "<strong>Sushi Suga</strong>: reservar con mucha antelacion. Solo 8 pax. De los mejores sushi en ambos viajes. Cosas fuera de carta (corazon de tiburon!).",
+        "<strong>Nihombashi Kakigaracho Sugita</strong>: sushi de alto nivel.",
+        "<strong>Sushi no Midori</strong>: reservar! Famoso, dentro de estacion Shibuya. Ir a las 11h tipo brunch.",
+        "<strong>Sushi Takamitsu</strong>: recomendado por locales, para darse un homenaje ($$$).",
+        "<strong>Kanda Matsuya</strong>: mucha gente local, noodles.",
+        "<strong>Ise Sueyoshi</strong>: reservar! Muy pequeno, cocina tradicional.",
+        "<strong>Tempuraya Miyagawa</strong>: especializado en tempura.",
+        "<strong>Ginza Hachigou</strong>: ramen con estrella Michelin! Reservas via TableCheck cada sabado.",
+        "<strong>Rojiura Curry Samurai</strong>: curry japones. Probadlo en Shimokitazawa.",
+        "<strong>Shizuru</strong>: cocina tradicional.",
+        "<strong>Tatemichida</strong>: izakaya divertida, conviene reservar.",
+        "<strong>Kanemasu</strong>: izakaya super local. Menu sin traducir ni fotos. Pides por fotos de Google.",
+        "<strong>Kotaro</strong>: ambientazo, reservar con mas de 1 mes."
+      ]},
+      {title:"&#x1F378; Copas y noche",items:["<strong>Bar Trench</strong>: copa buena buena","Hotel con bar en planta superior: vistas al atardecer, se ve el Fuji","<strong>The Music Bar Cave Shibuya</strong> y <strong>A10</strong>: bares de vinilos","<strong>1OAK</strong>: discotecaza, hip-hop"]},
+    ]
+  }
+];
+
+document.getElementById('city-guides').innerHTML=guides.map(g=>`
+  <div class="city-guide" id="${g.id}">
+    <div class="city-header">
+      <div class="city-icon" style="background:${g.iconBg};color:#fff">${g.icon}</div>
+      <div>
+        <h3>${g.name}</h3>
+        <p>${g.sub}</p>
+      </div>
+    </div>
+    ${g.highlights.map(h=>`<div class="highlight-box"><h5>${h.title}</h5><p>${h.text}</p></div>`).join('')}
+    <div class="sub-grid">
+      ${g.sections.map(s=>`
+        <div class="sub-card">
+          <h5>${s.title}</h5>
+          <ul>${s.items.map(i=>`<li>${i}</li>`).join('')}</ul>
+        </div>`).join('')}
+    </div>
+  </div>`).join('');
+
+// ═══════════════ MAP — dynamic per itinerary ═══════════════
+const map=L.map('map',{scrollWheelZoom:false,zoomControl:true}).setView([35.5,137],7);
+L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{
+  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+  subdomains:'abcd',maxZoom:19
+}).addTo(map);
+
+// All cities with itinerary membership
+const allCities=[
+  // Shared
+  {name:"Tokyo",lat:35.6762,lng:139.6503,color:"#c0392b",type:"principal",
+   itin:{0:"Dias 1, 11-15",1:"Dias 1-8, 17-20",2:"Dias 1-5, 13-15"}},
+  {name:"Kyoto",lat:35.0116,lng:135.7681,color:"#d4a853",type:"historica",
+   itin:{0:"Dias 9-10",1:"Dia 10"}},
+  // Principiantes
+  {name:"Nakatsugawa",lat:35.4872,lng:137.5003,color:"#2d6a4f",type:"naturaleza",
+   itin:{0:"Dia 2 (Nakasendo)"}},
+  {name:"Takayama",lat:36.1461,lng:137.2522,color:"#2d6a4f",type:"naturaleza",
+   itin:{0:"Dia 3"}},
+  {name:"Shirakawa-go",lat:36.2577,lng:136.9066,color:"#2d6a4f",type:"naturaleza",
+   itin:{0:"Dia 4"}},
+  {name:"Kanazawa",lat:36.5613,lng:136.6562,color:"#d4a853",type:"historica",
+   itin:{0:"Dias 4-5"}},
+  {name:"Osaka",lat:34.6937,lng:135.5023,color:"#c0392b",type:"principal",
+   itin:{0:"Dias 6-8",1:"Dia 12"}},
+  {name:"Nara",lat:34.6851,lng:135.8048,color:"#d4a853",type:"historica",
+   itin:{0:"Dia 8 (day trip)"}},
+  // Arte + Verano
+  {name:"Hakone",lat:35.2326,lng:139.1070,color:"#2d6a4f",type:"naturaleza",
+   itin:{1:"Dia 9"}},
+  {name:"Naoshima",lat:34.4603,lng:133.9956,color:"#1e3a5f",type:"arte",
+   itin:{1:"Dia 11"}},
+  {name:"Ishigaki",lat:24.3448,lng:124.1572,color:"#1e3a5f",type:"arte",
+   itin:{1:"Dias 13-16"}},
+  {name:"Shanghai",lat:31.2304,lng:121.4737,color:"#6b7280",type:"escala",
+   itin:{1:"Dias 20-21"}},
+  // Rural + Tohoku
+  {name:"Sendai",lat:38.2682,lng:140.8694,color:"#2d6a4f",type:"naturaleza",
+   itin:{2:"Dias 6-8"}},
+  {name:"Matsushima",lat:38.3727,lng:141.0612,color:"#2d6a4f",type:"naturaleza",
+   itin:{2:"Dia 7"}},
+  {name:"Yamadera",lat:38.3138,lng:140.4372,color:"#d4a853",type:"historica",
+   itin:{2:"Dia 8"}},
+  {name:"Hiraizumi",lat:38.9862,lng:141.1137,color:"#d4a853",type:"historica",
+   itin:{2:"Dia 9"}},
+  {name:"Hirosaki",lat:40.6032,lng:140.4641,color:"#2d6a4f",type:"naturaleza",
+   itin:{2:"Dia 10"}},
+  {name:"Tsuroka",lat:38.7273,lng:139.8264,color:"#2d6a4f",type:"naturaleza",
+   itin:{2:"Dia 11"}},
+  {name:"Dewa Sanzan",lat:38.6988,lng:139.9835,color:"#2d6a4f",type:"naturaleza",
+   itin:{2:"Dia 12"}},
+];
+
+// Routes per itinerary (coordinate arrays)
+const routes={
+  0:[ // Principiantes
+    [35.6762,139.6503],[35.4872,137.5003],[36.1461,137.2522],[36.2577,136.9066],
+    [36.5613,136.6562],[34.6937,135.5023],[34.6851,135.8048],[35.0116,135.7681],[35.6762,139.6503]
+  ],
+  1:[ // Arte + Verano
+    [35.6762,139.6503],[35.2326,139.1070],[35.0116,135.7681],[34.4603,133.9956],
+    [34.6937,135.5023],[24.3448,124.1572],[35.6762,139.6503],[31.2304,121.4737]
+  ],
+  2:[ // Rural + Tohoku
+    [35.6762,139.6503],[38.2682,140.8694],[38.3727,141.0612],[38.3138,140.4372],
+    [38.9862,141.1137],[40.6032,140.4641],[38.7273,139.8264],[38.6988,139.9835],[35.6762,139.6503]
+  ]
+};
+
+const routeColors={0:'#c0392b',1:'#1e3a5f',2:'#2d6a4f'};
+const routeNames={0:'Principiantes',1:'Arte + Verano',2:'Rural + Tohoku'};
+
+let mapLayers=[];  // all dynamic layers to clear on tab change
+let currentMapTab=0;
+
+function renderMap(tabIdx){
+  currentMapTab=tabIdx;
+  // Clear previous layers
+  mapLayers.forEach(l=>map.removeLayer(l));
+  mapLayers=[];
+
+  // Filter cities for this itinerary
+  const activeCities=allCities.filter(c=>c.itin[tabIdx]);
+
+  // Draw route polyline
+  const routeCoords=routes[tabIdx];
+  const polyline=L.polyline(routeCoords,{
+    color:routeColors[tabIdx],weight:3.5,opacity:.75,dashArray:'10,7'
+  }).addTo(map);
+  mapLayers.push(polyline);
+
+  // Train icons at midpoints
+  for(let i=0;i<routeCoords.length-1;i++){
+    const midLat=(routeCoords[i][0]+routeCoords[i+1][0])/2;
+    const midLng=(routeCoords[i][1]+routeCoords[i+1][1])/2;
+    const train=L.marker([midLat,midLng],{
+      icon:L.divIcon({className:'',html:'<div style="font-size:15px;background:#fff;border-radius:8px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);border:1px solid #eee">🚅</div>',iconSize:[26,26],iconAnchor:[13,13]})
+    }).addTo(map);
+    mapLayers.push(train);
+  }
+
+  // City markers + labels
+  activeCities.forEach((c,idx)=>{
+    const isMain=c.name==="Tokyo";
+    const marker=L.circleMarker([c.lat,c.lng],{
+      radius:isMain?13:9,fillColor:c.color,color:"#fff",weight:3,fillOpacity:1
+    }).addTo(map);
+    marker.bindPopup(`<div style="font-family:DM Sans,sans-serif;min-width:150px">
+      <strong style="font-size:16px">${c.name}</strong><br>
+      <span style="color:#888;font-size:13px">${c.itin[tabIdx]}</span><br>
+      <span style="display:inline-block;margin-top:6px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:${c.color}18;color:${c.color};border:1px solid ${c.color}30">${c.type}</span>
+    </div>`);
+    mapLayers.push(marker);
+
+    // Text label
+    const label=L.marker([c.lat,c.lng],{
+      icon:L.divIcon({className:'',html:`<div style="font-family:DM Sans,sans-serif;font-weight:800;font-size:12px;color:${c.color};text-shadow:1px 1px 2px #fff,-1px -1px 2px #fff,1px -1px 2px #fff,-1px 1px 2px #fff;white-space:nowrap;pointer-events:none;transform:translate(${isMain?16:14}px,-8px)">${c.name}</div>`,iconSize:[0,0]})
+    }).addTo(map);
+    mapLayers.push(label);
+  });
+
+  // Fit bounds with padding
+  const bounds=L.latLngBounds(activeCities.map(c=>[c.lat,c.lng]));
+  map.fitBounds(bounds.pad(.15));
+
+  // Update map subtitle
+  const sub=document.getElementById('map-subtitle');
+  if(sub) sub.textContent=`Mostrando ruta: ${routeNames[tabIdx]} (${activeCities.length} paradas)`;
+}
+
+// Hook into tab switching
+const origSwitchTab=switchTab;
+switchTab=function(i){
+  origSwitchTab(i);
+  renderMap(i);
+};
+
+// Initial render
+renderMap(0);
+</script>
+</body>
+</html>
